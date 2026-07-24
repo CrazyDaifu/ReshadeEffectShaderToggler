@@ -66,14 +66,16 @@ function Write-GitCommitObject {
         [Parameter(Mandatory = $true)][string]$Tree,
         [Parameter(Mandatory = $true)][string]$Parent,
         [Parameter(Mandatory = $true)][object]$Author,
+        [Parameter(Mandatory = $true)][string]$AuthorOffset,
         [Parameter(Mandatory = $true)][object]$Committer,
+        [Parameter(Mandatory = $true)][string]$CommitterOffset,
         [Parameter(Mandatory = $true)][string]$Message
     )
 
     $authorTimestamp = [DateTimeOffset]::Parse($Author.date).ToUnixTimeSeconds()
     $committerTimestamp = [DateTimeOffset]::Parse($Committer.date).ToUnixTimeSeconds()
-    $body = "tree $Tree`nparent $Parent`nauthor $($Author.name) <$($Author.email)> $authorTimestamp +0000`n" +
-        "committer $($Committer.name) <$($Committer.email)> $committerTimestamp +0000`n`n$Message"
+    $body = "tree $Tree`nparent $Parent`nauthor $($Author.name) <$($Author.email)> $authorTimestamp $AuthorOffset`n" +
+        "committer $($Committer.name) <$($Committer.email)> $committerTimestamp $CommitterOffset`n`n$Message"
 
     $startInfo = New-Object System.Diagnostics.ProcessStartInfo
     $startInfo.FileName = 'git.exe'
@@ -308,7 +310,9 @@ try {
             -Tree $tree.sha `
             -Parent $currentParent `
             -Author $createdCommit.author `
+            -AuthorOffset ([DateTimeOffset]::Parse($author.date).ToString('zzz').Replace(':', '')) `
             -Committer $createdCommit.committer `
+            -CommitterOffset ([DateTimeOffset]::Parse($committer.date).ToString('zzz').Replace(':', '')) `
             -Message $createdCommit.message
         if ($localApiCommit -ne $createdCommit.sha) {
             throw "Locally reconstructed API commit '$localApiCommit' does not match GitHub commit '$($createdCommit.sha)'."

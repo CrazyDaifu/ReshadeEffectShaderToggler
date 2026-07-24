@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a rendering regression, crash, or compatibility problem
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: textarea
+    id: symptom
+    attributes:
+      label: Symptom
+      description: Describe what changed on screen or how the process failed.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Game, ReShade version, graphics API, architecture, GPU, and driver.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Attach ReShade.log, screenshots, add-on hash, and relevant configuration.
+    validations:
+      required: true

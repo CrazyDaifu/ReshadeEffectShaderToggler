@@ -256,3 +256,24 @@ paket-files/
 
 # Shaders
 *.cso
+
+# Maintained build and release outputs
+!build/
+!build/README.md
+!build/ReshadeEffectShaderToggler.addon32
+!build/SHA256SUMS.txt
+!releases/
+!releases/**
+
+# Generated source packages
+packages/*.zip
+packages/*.zip.sha256
+!packages/
+!packages/README.md
+
+# Local diagnostic and backup material
+deps/reshade-v20-backup/
+src/Win32/
+src/x64/
+deps/libMinHook/Win32/
+deps/libMinHook/x64/

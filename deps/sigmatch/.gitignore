@@ -1,0 +1,20 @@
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+
+# Build directory
+build/
+
+# Visual Studio for CMake
+.vs/
+out/
+CMakeSettings.json
+
+# VSCode
+.vscode/

@@ -1,4 +1,28 @@
-# ReshadeEffectShaderToggler [![MSBuild](https://github.com/4lex4nder/ReshadeEffectShaderToggler/actions/workflows/msbuild.yml/badge.svg)](https://github.com/4lex4nder/ReshadeEffectShaderToggler/actions/workflows/msbuild.yml) [![Release](https://github.com/4lex4nder/ReshadeEffectShaderToggler/actions/workflows/release.yml/badge.svg)](https://github.com/4lex4nder/ReshadeEffectShaderToggler/actions/workflows/release.yml)
+# ReshadeEffectShaderToggler - BF2 windowed D3D9 fix
+
+This repository is a maintainable fork of
+[4lex4nder/ReshadeEffectShaderToggler](https://github.com/4lex4nder/ReshadeEffectShaderToggler).
+It keeps the upstream behavior and adds one compatibility fix for 32-bit Direct3D 9
+swap-chain surfaces.
+
+## Fork status
+
+- Target: Battlefield 2 (2005), native 32-bit D3D9, windowed mode.
+- Tested runtime: ReShade 6.3.7 with add-on support.
+- Fix: allow REST's global resource-view cache to create render-target views for
+  `resource_type::surface`, which is how ReShade exposes D3D9 swap-chain back buffers.
+- Source delta: one condition in `src/GlobalResourceView.cpp`; no forced rendering or
+  D3D9 state-block hooks.
+- Runtime result: confirmed by the project owner in fullscreen and windowed gameplay.
+
+Install `build/ReshadeEffectShaderToggler.addon32` beside the game's 32-bit ReShade
+`d3d9.dll`. Existing REST configuration remains compatible.
+
+See [BUILDING](docs/BUILDING.md), [TESTING](docs/TESTING.md),
+[BUGS](docs/BUGS.md), and [PUBLISHING](docs/PUBLISHING.md) for maintenance details.
+
+## Upstream documentation
+
 Reshade 5.8+ addon to apply Reshade effects to render targets bound before specific, user-configurable, groups of shaders are 
 encountered within a game's rendering pipeline.
 

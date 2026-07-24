@@ -180,7 +180,10 @@ try {
         Invoke-Checked git push origin $ReleaseTag
     }
 
-    $url = (& $gh repo view $forkRepository --json url --jq .url).Trim()
+    $url = (& $gh api "repos/$forkRepository" --jq .html_url).Trim()
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($url)) {
+        $url = "https://github.com/$forkRepository"
+    }
     Write-Host ''
     Write-Host "Published fork: $url"
     Write-Host "Actions: $url/actions"

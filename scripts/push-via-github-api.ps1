@@ -61,6 +61,53 @@ function Get-GitBlobBytes {
     }
 }
 
+function Write-GitCommitObject {
+    param(
+        [Parameter(Mandatory = $true)][string]$Tree,
+        [Parameter(Mandatory = $true)][string]$Parent,
+        [Parameter(Mandatory = $true)][object]$Author,
+        [Parameter(Mandatory = $true)][object]$Committer,
+        [Parameter(Mandatory = $true)][string]$Message
+    )
+
+    $authorTimestamp = [DateTimeOffset]::Parse($Author.date).ToUnixTimeSeconds()
+    $committerTimestamp = [DateTimeOffset]::Parse($Committer.date).ToUnixTimeSeconds()
+    $body = "tree $Tree`nparent $Parent`nauthor $($Author.name) <$($Author.email)> $authorTimestamp +0000`n" +
+        "committer $($Committer.name) <$($Committer.email)> $committerTimestamp +0000`n`n$Message"
+
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = 'git.exe'
+    $startInfo.Arguments = 'hash-object -t commit -w --stdin'
+    $startInfo.WorkingDirectory = $repoRoot
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardInput = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    if (-not $process.Start()) {
+        throw 'Unable to write the GitHub-compatible commit object locally.'
+    }
+
+    try {
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($body)
+        $process.StandardInput.BaseStream.Write($bytes, 0, $bytes.Length)
+        $process.StandardInput.Close()
+        $sha = $process.StandardOutput.ReadToEnd().Trim()
+        $errorText = $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+        if ($process.ExitCode -ne 0) {
+            throw "Unable to write the GitHub-compatible commit object locally: $errorText"
+        }
+        return $sha
+    }
+    finally {
+        $process.Dispose()
+    }
+}
+
 function Invoke-GitHubRequest {
     param(
         [Parameter(Mandatory = $true)][ValidateSet('Get', 'Post', 'Patch')][string]$Method,
@@ -257,20 +304,29 @@ try {
             author    = $author
             committer = $committer
         }
-        if ($createdCommit.sha -ne $commit) {
-            throw "GitHub commit '$($createdCommit.sha)' does not match local commit '$commit'."
+        $localApiCommit = Write-GitCommitObject `
+            -Tree $tree.sha `
+            -Parent $currentParent `
+            -Author $createdCommit.author `
+            -Committer $createdCommit.committer `
+            -Message $createdCommit.message
+        if ($localApiCommit -ne $createdCommit.sha) {
+            throw "Locally reconstructed API commit '$localApiCommit' does not match GitHub commit '$($createdCommit.sha)'."
         }
         $currentParent = $createdCommit.sha
     }
 
     [void](Invoke-GitHubRequest Patch "repos/$Repository/git/refs/heads/$Branch" @{
-            sha   = $localHead
+            sha   = $currentParent
             force = $false
         })
 
-    Invoke-CheckedGit update-ref "refs/remotes/origin/$Branch" $localHead
+    if ($currentParent -ne $localHead) {
+        Invoke-CheckedGit update-ref "refs/heads/$Branch" $currentParent $localHead
+    }
+    Invoke-CheckedGit update-ref "refs/remotes/origin/$Branch" $currentParent
     Invoke-CheckedGit branch "--set-upstream-to=origin/$Branch" $Branch
-    Write-Host "GitHub API push completed: $Repository $Branch @ $localHead"
+    Write-Host "GitHub API push completed: $Repository $Branch @ $currentParent"
 }
 finally {
     $token = $null

@@ -140,11 +140,6 @@ void RenderingShaderManager::InitShaders(reshade::api::device* device) {
 void RenderingShaderManager::DestroyShaders(reshade::api::device* device) {
     DeviceDataContainer& shader = device->get_private_data<DeviceDataContainer>();
 
-    if (shader.customShader.fullscreenQuadVertexBuffer != 0) {
-        device->destroy_resource(shader.customShader.fullscreenQuadVertexBuffer);
-        shader.customShader.fullscreenQuadVertexBuffer = { 0 };
-    }
-
     if (shader.customShader.copyPipeline.pipeline != 0) {
         device->destroy_pipeline(shader.customShader.copyPipeline.pipeline);
         shader.customShader.copyPipeline.pipeline = { 0 };
@@ -173,6 +168,11 @@ void RenderingShaderManager::DestroyShaders(reshade::api::device* device) {
     if (shader.customShader.alphaPreservingCopyPipeline.pipelineSampler != 0) {
         device->destroy_sampler(shader.customShader.alphaPreservingCopyPipeline.pipelineSampler);
         shader.customShader.alphaPreservingCopyPipeline.pipelineSampler = { 0 };
+    }
+
+    if (shader.customShader.fullscreenQuadVertexBuffer != 0) {
+        device->destroy_resource(shader.customShader.fullscreenQuadVertexBuffer);
+        shader.customShader.fullscreenQuadVertexBuffer = { 0 };
     }
 }
 

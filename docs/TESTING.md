@@ -3,8 +3,9 @@
 ## Confirmed configuration
 
 - Battlefield 2 (2005)
-- ReShade 6.3.7 with full add-on support
+- ReShade 6.3.7 and 6.7.3 with full add-on support
 - Native Direct3D 9, 32-bit `d3d9.dll`
+- ReShade 6.7.3 x86 proxying to DXVK 2.5.3 through `d3d9_dxvk.dll`
 - 1600x900 windowed test shown in the diagnostic log
 - REST group and ReShade effects enabled
 
@@ -17,6 +18,8 @@
 | Windowed map load and gameplay | Pass; effects remain visible with REST enabled |
 | REST disabled | Pass; ordinary ReShade path remains normal |
 | Screenshot versus visible output | Pass; both show the same processed image |
+| DXVK startup Reset | Pass; REST resources released and runtime recreated |
+| Old/new DLL A/B Reset harness | Old DLL: `D3DERR_INVALIDCALL`; fixed DLL: `D3D_OK` |
 | dgVoodoo2 D3D11 translation | Not a supported workaround; rendering and memory issues |
 
 ## Release regression checklist

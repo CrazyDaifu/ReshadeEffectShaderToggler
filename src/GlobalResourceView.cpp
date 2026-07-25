@@ -70,4 +70,5 @@ void GlobalResourceView::Dispose(bool deviceValid) {
     rtv_srgb = { 0 };
     srv = { 0 };
     srv_srgb = { 0 };
+    state = GlobalResourceState::RESOURCE_INVALID;
 }
